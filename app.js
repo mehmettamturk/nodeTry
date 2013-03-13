@@ -29,7 +29,58 @@ app.configure('development', function(){
 
 app.get('/', routes.index);
 app.get('/users', user.list);
+app.get('/chatPage', routes.chatPage);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
+});
+
+/* SOCKET I O I O I O I O */
+// Socket bağlantısı kurulur
+var io = require('socket.io').listen(app);
+
+// Kullanıcı Listesinin tutulacağı Object
+var kullanicilar = {};
+
+// Bağlantı kurulduğunda çalışacak kısım
+io.sockets.on('connection', function(socket){
+    // Kullanıcı Ekleme Fonksiyonu
+    socket.on("kullaniciEkle", function(kullaniciadi){
+        // Kullanıcı session'nda bilgileri saklıyoruz
+        socket.kullaniciAdi = kullaniciadi;
+        socket.userId = kullanicilar.length;
+
+        // Array'e kullanıcı bilgilerini ekliyoruz
+        kullanicilar[kullaniciadi] = {
+            userName : kullaniciadi,
+            userId : kullanicilar.length
+        };
+
+        // Bağlanan kullanıcıya hoşgeldin mesajı yolluyoruz
+        socket.emit("mesajGonder", "Sistem", "Hoşgeldiniz.");
+
+        // Bütün kullanıcılara yeni kullanıcı bağlandı mesajı yolluyoruz
+        socket.broadcast.emit("mesajGonder", "Sistem", kullaniciadi + " muhabbete bağlandı.");
+
+        // Bağlı kullanıcılarda Kullanıcı listesini yeniliyoruz
+        io.sockets.emit("kullanicilariYenile", kullanicilar);
+    });
+
+    // Bağlantı kesildiği takdirde çalışacak fonksiyon
+    socket.on("disconnect", function(){
+        // Kullanıcıyı listeden siliyoruz
+        delete kullanicilar[socket.kullaniciAdi];
+
+        // Bağlı kullanıcılarda Kullanıcı listesini yeniliyoruz
+        io.sockets.emit("kullanicilariYenile", kullanicilar);
+
+        // Bağlı kullanıcılara kullanıcı çıktı mesajı yolluyoruz
+        socket.broadcast.emit("mesajGonder", "Sistem", socket.kullaniciAdi + " muhabbetten ayrıldı :(");
+    });
+
+    // Client tarafından mesaj yollama fonksiyonu
+    socket.on("mesajYolla", function(data){
+        // Bağlı kullanıcılara kullanıcıdan gelen mesajı yolluyoruz
+        io.sockets.emit("mesajGonder", socket.kullaniciAdi, data);
+    });
 });
