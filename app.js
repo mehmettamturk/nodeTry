@@ -38,7 +38,7 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 /* SOCKET I O I O I O I O */
 // Socket bağlantısı kurulur
 var io = require('socket.io').listen(server);
-
+io.connect('http://localhost:3000');
 // Kullanıcı Listesinin tutulacağı Object
 var kullanicilar = {};
 
@@ -84,3 +84,4 @@ io.sockets.on('connection', function(socket){
         io.sockets.emit("mesajGonder", socket.kullaniciAdi, data);
     });
 });
+
