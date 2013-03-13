@@ -31,13 +31,13 @@ app.get('/', routes.index);
 app.get('/users', user.list);
 app.get('/chatPage', routes.chatPage);
 
-http.createServer(app).listen(app.get('port'), function(){
+var server = http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });
 
 /* SOCKET I O I O I O I O */
 // Socket bağlantısı kurulur
-var io = require('socket.io').listen(app);
+var io = require('socket.io').listen(server);
 
 // Kullanıcı Listesinin tutulacağı Object
 var kullanicilar = {};
