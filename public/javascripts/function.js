@@ -1,7 +1,7 @@
 var socket;
 
 function SocketTarafi(kulIsmi){
-    var socket = io.connect("http://localhost:3000");
+    var socket = io.connect("pure-sierra-7611.herokuapp.com");
     socket.on("connect", function(){
         socket.emit("kullaniciEkle", kulIsmi);
         $('#isimGirisEkrani').fadeOut("slow", function(){
